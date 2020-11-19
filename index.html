@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Linear Regression to Web - Agus Awaludin 171011400220</title>
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+	<div class="container pt-4">
+		<div class="col-md-4 m-auto">
+			<div class="row">
+				<div class="col-md-6">
+					<div class="form-group">
+						<label for="x">Nilai X :</label>
+						<input type="text" class="form-control" id="x">
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="form-group">
+						<label for="y">Nilai Y :</label>
+						<input type="text" class="form-control" id="y">
+					</div>
+				</div>
+				<div class="col-md-12"><input type="button" id="append" value="SUBMIT" class="btn btn-success btn-block"></div>
+			</div>
+		</div>
+		<div class="col-md-12 mt-5">
+		    <canvas id="myChart" width="400" height="100"></canvas>
+		</div>
+	</div>
+	
+	<script>
+	    var xs = []
+	    var ys = []
+	    var bestfit = []
+
+	    // Membuat model
+	    // Compile dengan parameter
+
+
+	    document.getElementById('x').value = 1; // Membuat nilai permulaan untuk X
+
+	    document.getElementById("append").onclick = function(){
+	        const model = tf.sequential();
+	        model.add(tf.layers.dense({units: 128, inputShape: [1]}));
+	        model.add(tf.layers.dense({units: 128, inputShape: [128],activation:'sigmoid'}));
+	        model.add(tf.layers.dense({units: 1, inputShape: [128]}));
+	        const optimizer=tf.train.adam(0.01);
+	        model.compile({loss: 'meanSquaredError', optimizer: optimizer});
+	        var x = document.getElementById("x").value; // Mengambil nilai terakhir untuk X
+	        var y = document.getElementById("y").value; // Mengambil nilai terakhir untuk Y
+	        xs.push(x) // Menambahkan nilai pada xs
+	        ys.push(y) // Menambahkan nilai pada ys
+	        document.getElementById('x').value = parseInt(x)+1; // Menambahkan 1 nilai otomatis pada X
+
+	        model.fit(tf.tensor(xs), tf.tensor(ys), {epochs:200}).then(() => {
+	            bestfit = model.predict(tf.tensor(xs, [xs.length, 1])).dataSync(); // Membuat Best-Fit Line dari data xs
+	            var ctx = document.getElementById("myChart").getContext('2d'); // Memulai Chart
+
+	            // Pengaturan Chart
+	            var myChart = new Chart(ctx, {
+	                type: 'line',
+	                options: {scales:{yAxes: [{ticks: {beginAtZero: true}}]}},
+	                data: {
+	                    labels: xs,
+	                    datasets: [{
+	                        label: 'Original dataset',
+
+	                        data: ys
+	                    },
+	                        {
+	                            label: 'Best Fit line',
+	                            data: bestfit,
+	                            borderWidth: 1,
+	                            borderColor: '#28a745',
+	                            backgroundColor: 'rgba(1,1,1,0)'
+	                        }
+	                    ]
+	                },
+	            });
+	        });
+	    }
+	</script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.11.2"> </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"> </script>
+</body>
+</html>
